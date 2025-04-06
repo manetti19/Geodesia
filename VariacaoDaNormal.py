@@ -2,6 +2,10 @@ from scipy.integrate import quad
 from scipy.optimize import root_scalar
 import numpy as np
 
+#A partir do equador, anda-se 2000 km ao longo de um meridiano.
+#Qual foi a variação angular da normal em relação à superfície?
+#(ou seja, quanto a normal girou no espaço tridimensional)
+
 # Parâmetros do elipsoide WGS84
 a = 6378137  # semi-eixo maior
 f = 1 / 298.257223563
