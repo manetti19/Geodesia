@@ -1,5 +1,6 @@
 import math
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Constantes do elipsoide GRS80
 a = 6378137.0  # raio equatorial em metros
@@ -21,13 +22,21 @@ def P(phi):
 
 # Lista de resultados
 results = []
+latitudes = []
+longitudes = []
 
 for i in range(n_iter + 1):
+    lat_deg = math.degrees(phi)
+    lon_deg = math.degrees(lamb)
+
     results.append({
         "Iteração": i,
-        "Latitude (°)": math.degrees(phi),
-        "Longitude (°)": math.degrees(lamb)
+        "Latitude (°)": lat_deg,
+        "Longitude (°)": lon_deg
     })
+
+    latitudes.append(lat_deg)
+    longitudes.append(lon_deg)
     
     # Cálculo dos incrementos
     delta_phi = (math.cos(alpha) / M(phi)) * delta_s
@@ -37,6 +46,16 @@ for i in range(n_iter + 1):
     phi += delta_phi
     lamb += delta_lamb
 
-# Exibir como tabela (opcional, se estiver em Jupyter)
+# Converter para DataFrame e exibir
 df = pd.DataFrame(results)
 print(df)
+
+# Plotar gráfico
+plt.figure(figsize=(8, 6))
+plt.plot(longitudes, latitudes, marker='o')
+plt.title('Trajetória Geodésica (incrementos de 10 km)')
+plt.xlabel('Longitude (°)')
+plt.ylabel('Latitude (°)')
+plt.grid(True)
+plt.tight_layout()
+plt.show()
