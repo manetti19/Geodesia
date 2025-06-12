@@ -69,6 +69,7 @@ print(f"Área aproximada do triângulo geodésico: {area_aproximada:.2f} m²")
 
 
 print("3.")
+print("resposta do chat")
 from pyproj import CRS, Transformer
 
 # Coordenadas cartesianas (X, Y, Z) de Argel em WGS-84
@@ -99,4 +100,99 @@ delta_h = h_e - h_a
 # Resultado
 print(f"Altura elipsoidal (Espanhol): {h_e:.4f} m")
 print(f"Altura elipsoidal (Africano): {h_a:.4f} m")
+print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
+
+
+
+
+
+
+print("teste")
+import math
+
+def ecef_to_geodetic(X, Y, Z, a=6378137.0, f=1/298.257223563, tol=1e-12):
+    # Longitude
+    lamb = math.atan2(Y, X)
+
+    # Parâmetros do elipsoide
+    b = a * (1 - f)
+    e2 = (a**2 - b**2) / a**2
+    ep2 = (a**2 - b**2) / b**2
+
+    # Cálculo inicial
+    p = math.sqrt(X**2 + Y**2)
+    theta = math.atan2(Z * a, p * b)
+
+    # Latitude inicial (método de Bowring)
+    phi = math.atan2(Z + ep2 * b * math.sin(theta)**3,
+                     p - e2 * a * math.cos(theta)**3)
+
+    # Iteração para refinar latitude
+    prev_phi = 0
+    while abs(phi - prev_phi) > tol:
+        prev_phi = phi
+        N = a / math.sqrt(1 - e2 * math.sin(phi)**2)
+        h = p / math.cos(phi) - N
+        phi = math.atan2(Z, p * (1 - e2 * (N / (N + h))))
+
+    # Cálculo final de altura
+    N = a / math.sqrt(1 - e2 * math.sin(phi)**2)
+    h = p / math.cos(phi) - N
+
+    # Conversão para graus
+    phi_deg = math.degrees(phi)
+    lamb_deg = math.degrees(lamb)
+
+    return phi_deg, lamb_deg, h
+
+# Exemplo de uso:
+x, y, z = +5127503.301, +263725.842, +3772323.766
+phi, lamb, h = ecef_to_geodetic(x, y, z)
+print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
+h1=h
+
+
+
+print("teste'")
+def ecef_to_geodetic(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
+    # Longitude
+    lamb = math.atan2(Y, X)
+
+    # Parâmetros do elipsoide
+    b = a * (1 - f)
+    e2 = (a**2 - b**2) / a**2
+    ep2 = (a**2 - b**2) / b**2
+
+    # Cálculo inicial
+    p = math.sqrt(X**2 + Y**2)
+    theta = math.atan2(Z * a, p * b)
+
+    # Latitude inicial (método de Bowring)
+    phi = math.atan2(Z + ep2 * b * math.sin(theta)**3,
+                     p - e2 * a * math.cos(theta)**3)
+
+    # Iteração para refinar latitude
+    prev_phi = 0
+    while abs(phi - prev_phi) > tol:
+        prev_phi = phi
+        N = a / math.sqrt(1 - e2 * math.sin(phi)**2)
+        h = p / math.cos(phi) - N
+        phi = math.atan2(Z, p * (1 - e2 * (N / (N + h))))
+
+    # Cálculo final de altura
+    N = a / math.sqrt(1 - e2 * math.sin(phi)**2)
+    h = p / math.cos(phi) - N
+
+    # Conversão para graus
+    phi_deg = math.degrees(phi)
+    lamb_deg = math.degrees(lamb)
+
+    return phi_deg, lamb_deg, h
+
+# Exemplo de uso:
+x, y, z = +5127503.301, +263725.842, +3772323.766
+phi, lamb, h = ecef_to_geodetic(x, y, z)
+print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
+h2=h
+delta_h=h1-h2
 print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
