@@ -105,12 +105,11 @@ print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
 
 
 
-
-
-print("teste")
+print("")
+print("resposta do chat'")
 import math
 
-def ecef_to_geodetic(X, Y, Z, a=6378137.0, f=1/298.257223563, tol=1e-12):
+def ecef_to_geodetic_africano(X, Y, Z, a=	6378245, f=1/297.5, tol=1e-12):
     # Longitude
     lamb = math.atan2(Y, X)
 
@@ -145,16 +144,13 @@ def ecef_to_geodetic(X, Y, Z, a=6378137.0, f=1/298.257223563, tol=1e-12):
 
     return phi_deg, lamb_deg, h
 
-# Exemplo de uso:
+print("Sistema Africano:")
 x, y, z = +5127503.301, +263725.842, +3772323.766
-phi, lamb, h = ecef_to_geodetic(x, y, z)
+phi, lamb, h = ecef_to_geodetic_africano(x, y, z)
 print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
 h1=h
 
-
-
-print("teste'")
-def ecef_to_geodetic(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
+def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
     # Longitude
     lamb = math.atan2(Y, X)
 
@@ -188,11 +184,12 @@ def ecef_to_geodetic(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
     lamb_deg = math.degrees(lamb)
 
     return phi_deg, lamb_deg, h
-
-# Exemplo de uso:
+print("")
+print("Sistema Espanhol:")
 x, y, z = +5127503.301, +263725.842, +3772323.766
-phi, lamb, h = ecef_to_geodetic(x, y, z)
+phi, lamb, h = ecef_to_geodetic_sist_espanhol(x, y, z)
 print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
 h2=h
-delta_h=h1-h2
+delta_h=h2-h1
+print("")
 print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
