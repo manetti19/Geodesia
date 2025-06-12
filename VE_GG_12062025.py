@@ -1,3 +1,4 @@
+print("1.")
 from geographiclib.geodesic import Geodesic
 
 # sistema espanhol
@@ -34,6 +35,9 @@ print(f"Azimute reverso (Barcelona → Cartagena): {azimuth_reverse:.3f}°")
 
 
 
+
+
+print("2.")
 import numpy as np
 
 # Parâmetros do elipsóide Espanhol
@@ -62,33 +66,37 @@ print(f"Área aproximada do triângulo geodésico: {area_aproximada:.2f} m²")
 
 
 
-from geographiclib.geocentric import Geocentric
+
+
+print("3.")
+from pyproj import CRS, Transformer
 
 # Coordenadas cartesianas (X, Y, Z) de Argel em WGS-84
 X = 5127503.301
 Y = 263725.842
 Z = 3772323.766
 
-# Elipsóide Espanhol
-a_espanhol = 6378444.0
-f_espanhol = 1 / 297.4
-geo_espanhol = Geocentric(a_espanhol, f_espanhol)
+# Define os elipsóides personalizados manualmente (espanhol e africano)
+crs_geocentric = CRS.from_proj4("+proj=geocent +datum=WGS84 +units=m +no_defs")
+
+# Elipsóide Espanhol (definido manualmente)
+crs_espanhol = CRS.from_proj4("+proj=latlong +a=6378444 +rf=297.4 +no_defs")
 
 # Elipsóide Africano
-a_africano = 6378245.0
-f_africano = 1 / 297.5
-geo_africano = Geocentric(a_africano, f_africano)
+crs_africano = CRS.from_proj4("+proj=latlong +a=6378245 +rf=297.5 +no_defs")
 
-# Conversão de (X, Y, Z) para (lat, lon, h) no sistema Espanhol
-lat_espanhol, lon_espanhol, h_espanhol = geo_espanhol.Reverse(X, Y, Z)
+# Transforma de cartesiano para geodésico no sistema Espanhol
+transformer_espanhol = Transformer.from_crs(crs_geocentric, crs_espanhol, always_xy=True)
+lon_e, lat_e, h_e = transformer_espanhol.transform(X, Y, Z)
 
-# Conversão de (X, Y, Z) para (lat, lon, h) no sistema Africano
-lat_africano, lon_africano, h_africano = geo_africano.Reverse(X, Y, Z)
+# Transforma de cartesiano para geodésico no sistema Africano
+transformer_africano = Transformer.from_crs(crs_geocentric, crs_africano, always_xy=True)
+lon_a, lat_a, h_a = transformer_africano.transform(X, Y, Z)
 
 # Diferença de alturas elipsoidais
-delta_h = h_espanhol - h_africano
+delta_h = h_e - h_a
 
-# Exibe os resultados
-print(f"Altura elipsoidal (Espanhol): {h_espanhol:.4f} m")
-print(f"Altura elipsoidal (Africano): {h_africano:.4f} m")
+# Resultado
+print(f"Altura elipsoidal (Espanhol): {h_e:.4f} m")
+print(f"Altura elipsoidal (Africano): {h_a:.4f} m")
 print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
