@@ -76,7 +76,7 @@ lat_niue = -18.935007
 lon_niue = -169.866038
 
 # Trópico de Capricórnio (latitude)
-lat_tropico = -23.433333
+lat_tropico = -23.43722
 
 # Linha geodésica
 geod = Geodesic.WGS84

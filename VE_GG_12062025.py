@@ -109,7 +109,7 @@ print("")
 print("resposta do chat'")
 import math
 
-def ecef_to_geodetic_africano(X, Y, Z, a=	6378245, f=1/297.5, tol=1e-12):
+def ecef_to_geodetic_africano(X, Y, Z, a=6378245.0, f=1/297.5, tol=1e-12):
     # Longitude
     lamb = math.atan2(Y, X)
 
@@ -150,7 +150,7 @@ phi, lamb, h = ecef_to_geodetic_africano(x, y, z)
 print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
 h1=h
 
-def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
+def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444.0, f=1/297.4, tol=1e-12):
     # Longitude
     lamb = math.atan2(Y, X)
 
@@ -168,7 +168,7 @@ def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
                      p - e2 * a * math.cos(theta)**3)
 
     # Iteração para refinar latitude
-    prev_phi = phi
+    prev_phi = 0
     while abs(phi - prev_phi) > tol:
         prev_phi = phi
         N = a / math.sqrt(1 - e2 * math.sin(prev_phi)**2)
@@ -184,6 +184,7 @@ def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
     lamb_deg = math.degrees(lamb)
 
     return phi_deg, lamb_deg, h
+
 print("")
 print("Sistema Espanhol:")
 x, y, z = +5127503.301, +263725.842, +3772323.766
@@ -193,3 +194,116 @@ h2=h
 delta_h=h2-h1
 print("")
 print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
+
+
+
+
+
+
+
+
+
+
+print("")
+print("resposta do chat''")
+import math
+
+def ecef_to_geodetic_newton_africano(X, Y, Z, a=6378245.0, f=1/297.5, tol=1e-12, max_iter=10):
+    # Parâmetros derivados
+    e2 = 2 * f - f ** 2         # excentricidade ao quadrado
+    b = a * (1 - f)
+    ep2 = (a ** 2 - b ** 2) / b ** 2
+
+    # Longitude
+    lamb = math.atan2(Y, X)
+
+    # Distância projetada no plano equatorial
+    p = math.sqrt(X ** 2 + Y ** 2)
+
+    # Chute inicial com método de Bowring
+    theta = math.atan2(Z * a, p * b)
+    phi = math.atan2(Z + ep2 * b * math.sin(theta) ** 3,
+                     p - e2 * a * math.cos(theta) ** 3)
+
+    # Newton-Raphson para refinar a latitude
+    for _ in range(max_iter):
+        sin_phi = math.sin(phi)
+        cos_phi = math.cos(phi)
+        N = a / math.sqrt(1 - e2 * sin_phi ** 2)
+        h = p / cos_phi - N
+        f_phi = Z / p - math.tan(phi) * (1 - e2 * N / (N + h))
+        df_phi = (-1 / cos_phi ** 2) * (1 - e2 * N / (N + h)) \
+                 - math.tan(phi) * e2 * N * (h + N * (1 - e2 * sin_phi ** 2)) / ((N + h) ** 2 * math.sqrt(1 - e2 * sin_phi ** 2))
+        delta = -f_phi / df_phi
+        phi += delta
+        if abs(delta) < tol:
+            break
+
+    # Altura final
+    N = a / math.sqrt(1 - e2 * math.sin(phi) ** 2)
+    h = p / math.cos(phi) - N
+
+    # Conversão para graus
+    phi_deg = math.degrees(phi)
+    lamb_deg = math.degrees(lamb)
+
+    return phi_deg, lamb_deg, h
+
+print("Sistema Africano:")
+x, y, z = +5127503.301, +263725.842, +3772323.766
+phi, lamb, h = ecef_to_geodetic_newton_africano(x, y, z)
+print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
+h1=h
+
+
+def ecef_to_geodetic_newton_espanhol(X, Y, Z, a=6378444.0, f=1/297.4, tol=1e-12, max_iter=10):
+    # Parâmetros derivados
+    e2 = 2 * f - f ** 2         # excentricidade ao quadrado
+    b = a * (1 - f)
+    ep2 = (a ** 2 - b ** 2) / b ** 2
+
+    # Longitude
+    lamb = math.atan2(Y, X)
+
+    # Distância projetada no plano equatorial
+    p = math.sqrt(X ** 2 + Y ** 2)
+
+    # Chute inicial com método de Bowring
+    theta = math.atan2(Z * a, p * b)
+    phi = math.atan2(Z + ep2 * b * math.sin(theta) ** 3,
+                     p - e2 * a * math.cos(theta) ** 3)
+
+    # Newton-Raphson para refinar a latitude
+    for _ in range(max_iter):
+        sin_phi = math.sin(phi)
+        cos_phi = math.cos(phi)
+        N = a / math.sqrt(1 - e2 * sin_phi ** 2)
+        h = p / cos_phi - N
+        f_phi = Z / p - math.tan(phi) * (1 - e2 * N / (N + h))
+        df_phi = (-1 / cos_phi ** 2) * (1 - e2 * N / (N + h)) \
+                 - math.tan(phi) * e2 * N * (h + N * (1 - e2 * sin_phi ** 2)) / ((N + h) ** 2 * math.sqrt(1 - e2 * sin_phi ** 2))
+        delta = -f_phi / df_phi
+        phi += delta
+        if abs(delta) < tol:
+            break
+
+    # Altura final
+    N = a / math.sqrt(1 - e2 * math.sin(phi) ** 2)
+    h = p / math.cos(phi) - N
+
+    # Conversão para graus
+    phi_deg = math.degrees(phi)
+    lamb_deg = math.degrees(lamb)
+
+    return phi_deg, lamb_deg, h
+
+print("")
+print("Sistema Espanhol:")
+x, y, z = +5127503.301, +263725.842, +3772323.766
+phi, lamb, h = ecef_to_geodetic_newton_espanhol(x, y, z)
+print(f"Latitude: {phi:.8f}°\nLongitude: {lamb:.8f}°\nAltura: {h:.3f} m")
+h2=h
+delta_h=h2-h1
+print("")
+print(f"Δh (Espanhol - Africano): {delta_h:.4f} m")
+
