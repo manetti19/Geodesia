@@ -168,11 +168,11 @@ def ecef_to_geodetic_sist_espanhol(X, Y, Z, a=6378444, f=1/297.4, tol=1e-12):
                      p - e2 * a * math.cos(theta)**3)
 
     # Iteração para refinar latitude
-    prev_phi = 0
+    prev_phi = phi
     while abs(phi - prev_phi) > tol:
         prev_phi = phi
-        N = a / math.sqrt(1 - e2 * math.sin(phi)**2)
-        h = p / math.cos(phi) - N
+        N = a / math.sqrt(1 - e2 * math.sin(prev_phi)**2)
+        h = p / math.cos(prev_phi) - N
         phi = math.atan2(Z, p * (1 - e2 * (N / (N + h))))
 
     # Cálculo final de altura
