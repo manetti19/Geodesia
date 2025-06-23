@@ -88,13 +88,57 @@ ds = line.s13 / n
 
 for i in range(n + 1):
     s = i * ds
-    pos = line.Position(s, Geodesic.STANDARD | Geodesic.LONG_UNROLL)
+    pos = line.Position(s)
     lat = pos['lat2']
     if lat >= lat_tropico:
         print(f"Latitude no cruzamento: {lat:.6f}°")
         print(f"Longitude no cruzamento: {pos['lon2']:.6f}°")
         print(f"Azimute geodésico no Trópico de Capricórnio: {pos['azi2']:.6f}°")
         break
+
+
+from math import floor
+def decimal_to_dms(value):
+    direction = ''
+    if value < 0:
+        direction = 'S' if abs(value) <= 90 else 'W'
+    else:
+        direction = 'N' if abs(value) <= 90 else 'E'
+    abs_val = abs(value)
+    degrees = floor(abs_val)
+    minutes = floor((abs_val - degrees) * 60)
+    seconds = (abs_val - degrees - minutes / 60) * 3600
+    return degrees, minutes, seconds, direction
+
+
+# Criar a linha geodésica
+linha = Geodesic.WGS84.Line(lat_chatham, lon_chatham, azimute)
+
+# Latitude do Trópico de Capricórnio (aproximada)
+lat_tropico = -23.43722
+
+# Buscar o ponto ao longo da linha onde se cruza o Trópico (amostragem)
+n = 1000
+passo = distancia_m / n
+ponto_anterior = linha.Position(0)
+
+azimute_no_tropico = None
+for i in range(1, n + 1):
+    s = i * passo
+    ponto = linha.Position(s)
+    if ponto['lat2'] > lat_tropico and ponto_anterior['lat2'] <= lat_tropico:
+        azimute_no_tropico = ponto['azi2']
+        break
+    ponto_anterior = ponto
+
+# Conversão para DMS
+azm_cap_dms = decimal_to_dms(azimute_no_tropico)
+
+# Resultado D
+print(f"Azimute ao cruzar o Trópico de Capricórnio: {azimute_no_tropico:.2f}°")
+print(f"ou {azm_cap_dms[0]}° {azm_cap_dms[1]}' {azm_cap_dms[2]:.2f}\"")
+
+
 
 
 print("e)")
@@ -214,10 +258,7 @@ f_wgs = 1 / 298.257223563
 # Conversão AGD84 → ECEF
 X_agd, Y_agd, Z_agd = geodetic_to_ecef(phi_agd, lam_agd, h_agd, a_agd, f_agd)
 
-# Parâmetros de transformação (aproximados)
-dX = -117.276
-dY = -51.724
-dZ = +137.892
+
 
 # Conversão ECEF → WGS84 (aplicando os deltas)
 X_wgs = X_agd + dX
