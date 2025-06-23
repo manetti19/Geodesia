@@ -239,3 +239,51 @@ print(f"Perímetro do polígono: {perimetro_km:.2f} km")
 
 print("e)")
 
+from geographiclib.geodesic import Geodesic
+
+# Elipsoide ELF-3019
+a = 6376159.218
+f = 1 / 299.674
+geod = Geodesic(a, f)
+
+# Trópico de Câncer (23°27′N)
+lat_tropico = 23 + 27/60
+
+# Ponto de partida: Bri
+lat_bri = 35 + 40/60
+lon_bri = -20 -15/60
+azimute_aguia = 4.0
+
+# Linha geodésica das Águias
+linha = geod.Line(lat_bri, lon_bri, azimute_aguia)
+
+# Amostragem ao longo da linha (até 40.000 km)
+n = 100_000
+s_total = 40_000_000
+ds = s_total / n
+
+intersec_lat = intersec_lon = None
+lat_anterior = lat_bri
+
+for i in range(1, n + 1):
+    pos = linha.Position(i * ds)
+    lat_atual = pos['lat2']
+
+    if lat_atual <= lat_tropico <= lat_anterior:
+        intersec_lat = pos['lat2']
+        intersec_lon = pos['lon2']
+        break
+    lat_anterior = lat_atual
+
+# Coordenadas de Valfenda
+lat_valfenda = 21 + 4/60 + 30.9/3600
+lon_valfenda = -(16 + 54/60 + 53.6/3600)
+
+# Problema inverso
+if intersec_lat is not None:
+    inverso = geod.Inverse(lat_valfenda, lon_valfenda, intersec_lat, intersec_lon)
+    azimute_saruman = inverso['azi1']
+    print(f"Azimute de Saruman: {azimute_saruman:.2f}°")
+    print(f"Ponto de encontro: ({intersec_lat:.6f}°, {intersec_lon:.6f}°)")
+else:
+    print("⚠️ Não foi possível encontrar a interseção.")
